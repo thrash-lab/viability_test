@@ -93,6 +93,27 @@ Testing values between 0.000 and 0.070 in increments of 0.001
 So now you know that your viability of your culture is between 0.9% to 6.5%. If you were planning a second field campaign to isolate a taxon you really need, you can now use the `predict_wells` function to estimate how many wells you need to inoculate in order to guarantee (within 95% CI) that you isolate that taxon, by setting the viability to the minimum. For this case, we're going to be looking at a LOT of wells, so we can scale back the bootstrapping to `-b 999` to speed things up:
 
 ```
+python viability_test/viability_test.py -b 999 predict_wells -w 2000 -i 2 -r 0.5 -v 0.009
+```
+
+```
+Predicting outcome of a DTE experiment using 4 processors and 999 bootstraps
+
+    You simulated a DTE where you inoculated 2000 wells with an average of 2 cells per well.
+    Your estimated relative abundance for your taxon of interest was:       50.000%
+    Your estimated viability of your taxon of interest was:                 0.900%
+    
+    After 999 simulations:
+    The median number of positive (not taxon-specific) wells was:           1271 (1229-1311, 95%CI)
+    The median number of wells inoculated with one cell was:                543 (503-580, 95%CI)
+    The median number of wells containing your taxon of interest was:       1263 (1221-1306, 95%CI)
+    The median number of pure wells for your taxon of interest was:         6 (2-12, 95%CI)
+ 
+```
+
+So, if you inoculated 20,000 wells, you would observe 2-12 taxon specific positive wells of growth. That's doable. Now imagine though that your taxon of interest is only 5% of your population.
+
+```
 python viability_test/viability_test.py -b 999 predict_wells -w 50000 -i 2 -r 0.05 -v 0.009
 ```
 
@@ -104,12 +125,11 @@ Predicting outcome of a DTE experiment using 4 processors and 999 bootstraps
     Your estimated viability of your taxon of interest was:                 0.900%
     
     After 999 simulations:
-    The median number of positive (not taxon-specific) wells was:           42530 (42362-42684, 95%CI)
-    The median number of wells inoculated with one cell was:                13525 (13348-13720, 95%CI)
-    The median number of wells containing your taxon of interest was:       4759 (4632-4889, 95%CI)
-    The median number of pure wells for your taxon of interest was:         6 (2-12, 95%CI)
- 
+    The median number of positive (not taxon-specific) wells was:           42527 (42371-42682, 95%CI)
+    The median number of wells inoculated with one cell was:                13534 (13342-13730, 95%CI)
+    The median number of wells containing your taxon of interest was:       4761 (4640-4888, 95%CI)
+    The median number of pure wells for your taxon of interest was:         7 (2-12, 95%CI)
 ```
 
-So, if you inoculated 50,000 wells, you would observe 2-12 taxon specific positive wells of growth. That would be a good time to start thinking about enrichment culturing or playing around with medium to improve viability!
+In that situation, we would need to inoculate 50,000 wells to have a good shot at culturing your target taxon. That would be a good time to start thinking about enrichment culturing or playing around with medium to improve viability!
 
