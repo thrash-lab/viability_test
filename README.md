@@ -96,5 +96,20 @@ So now you know that your viability of your culture is between 0.9% to 6.5%. If 
 python viability_test/viability_test.py -b 999 predict_wells -w 50000 -i 2 -r 0.05 -v 0.009
 ```
 
+```
+Predicting outcome of a DTE experiment using 4 processors and 999 bootstraps
+
+    You simulated a DTE where you inoculated 50000 wells with an average of 2 cells per well.
+    Your estimated relative abundance for your taxon of interest was:       5.000%
+    Your estimated viability of your taxon of interest was:                 0.900%
+    
+    After 999 simulations:
+    The median number of positive (not taxon-specific) wells was:           42530 (42362-42684, 95%CI)
+    The median number of wells inoculated with one cell was:                13525 (13348-13720, 95%CI)
+    The median number of wells containing your taxon of interest was:       4759 (4632-4889, 95%CI)
+    The median number of pure wells for your taxon of interest was:         6 (2-12, 95%CI)
+ 
+```
+
 So, if you inoculated 50,000 wells, you would observe 2-12 taxon specific positive wells of growth. That would be a good time to start thinking about enrichment culturing or playing around with medium to improve viability!
 
