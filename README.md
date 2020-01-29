@@ -88,3 +88,6 @@ Testing values between 0.000 and 0.070 in increments of 0.001
         The viability estimates that explain your observed counts is between:   0.900% - 6.500%
 
 ```
+
+## Managing Compute
+If the number of wells is large AND the number of bootstraps is large, then the bootstrapping can take a long time to perform. If you find your machine is struggling, then you can simply reduce the number of bootstraps using the `-b` or `--n_bootstraps` parameters for either method. 999 bootstraps will get you pretty close to decent values.
