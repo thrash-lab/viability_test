@@ -89,5 +89,12 @@ Testing values between 0.000 and 0.070 in increments of 0.001
 
 ```
 
-## Managing Compute
-If the number of wells is large AND the number of bootstraps is large, then the bootstrapping can take a long time to perform. If you find your machine is struggling, then you can simply reduce the number of bootstraps using the `-b` or `--n_bootstraps` parameters for either method. 999 bootstraps will get you pretty close to decent values.
+### Iterating between the two
+So now you know that your viability of your culture is between 0.9% to 6.5%. If you were planning a second field campaign to isolate a taxon you really need, you can now use the `predict_wells` function to estimate how many wells you need to inoculate in order to guarantee (within 95% CI) that you isolate that taxon, by setting the viability to the minimum. For this case, we're going to be looking at a LOT of wells, so we can scale back the bootstrapping to `-b 999` to speed things up:
+
+```
+python viability_test/viability_test.py -b 999 predict_wells -w 50000 -i 2 -r 0.05 -v 0.009
+```
+
+So, if you inoculated 50,000 wells, you would observe 2-12 taxon specific positive wells of growth. That would be a good time to start thinking about enrichment culturing or playing around with medium to improve viability!
+
