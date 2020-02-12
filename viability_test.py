@@ -4,6 +4,17 @@ from utility import get_ci
 import argparse
 import multiprocessing
 from multiprocessing import Pool
+from timeit import default_timer as timer
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 def setup_args():
     # Create argument parser
@@ -23,8 +34,7 @@ def setup_args():
     parser_estimate_viability.add_argument("-w", "--wells", help="The number of wells to simulate", type=int, required=True)
     parser_estimate_viability.add_argument("-i", "--inoculum", help="The number of cells added to each well", type=int, required=True)
     parser_estimate_viability.add_argument("-o", "--num_observed", help="The number of observed positive wells", type=int, required=True)
-    parser_estimate_viability.add_argument("-r", "--rel_abund", help="he relative abundance of a particular taxon in your inoculum",
-                                           type=float, default=1)
+    parser_estimate_viability.add_argument("-r", "--rel_abund", help="he relative abundance of a particular taxon in your inoculum", type=float, default=1)
 
     parser_predict_wells = subparsers.add_parser('predict_wells', help='Predict the number of wells you are likely to observe for a given taxon in a DTE experiment')
     parser_predict_wells.add_argument("-w", "--wells", help="The number of wells to simulate", type=int, required=True)
@@ -36,6 +46,11 @@ def setup_args():
     parser_predict_wells.add_argument('-v', '--viability',
                                       help='The estimated viability of a particular taxon in your inoculum', type=float,
                                       default=1)
+
+
+    parser_bulk_estimate = subparsers.add_parser('bulk', help='Perform a bulk estimate of viabilities from a TSV input')
+    parser_bulk_estimate.add_argument('-i', '--input', help='A TSV file containing rows with 4 columns defined as: wells, inoculum, rel_abund, viability')
+    parser_bulk_estimate.add_argument('-o', '--output', help='The output file')
     return parser.parse_args()
 
 
@@ -124,17 +139,17 @@ def predict_wells(inoculum, rel_abund, viability, num_wells):
     """
     print(f'Predicting outcome of a DTE experiment using {num_threads} processors and {number_of_experiments} bootstraps')
     result = bootstrap_dte(inoculum, rel_abund, viability, num_wells)
-    print(f'''
+    print(f'''{bcolors.OKGREEN}
     You simulated a DTE where you inoculated {num_wells} wells with an average of {inoculum} cells per well.
     Your estimated relative abundance for your taxon of interest was:       {rel_abund:1.3%}
     Your estimated viability of your taxon of interest was:                 {viability:1.3%}
-    
+
     After {number_of_experiments} simulations:
     The median number of positive (not taxon-specific) wells was:           {result.positive_well_med:.0f} ({result.positive_well_95pc_low:.0f}-{result.positive_well_95pc_high:.0f}, 95%CI)
     The median number of wells inoculated with one cell was:                {result.single_med:.0f} ({result.single_low:.0f}-{result.single_high:.0f}, 95%CI)
     The median number of wells containing your taxon of interest was:       {result.taxon_positive_med:.0f} ({result.taxon_positive_95pc_low:.0f}-{result.taxon_positive_95pc_high:.0f}, 95%CI)
     The median number of pure wells for your taxon of interest was:         {result.pure_well_med:.0f} ({result.pure_well_95pc_low:.0f}-{result.pure_well_95pc_high:.0f}, 95%CI)
-    ''')
+    {bcolors.ENDC}''')
 
 
 
@@ -150,6 +165,7 @@ def estimate_viability(inoculum, num_wells, observed_pure, rel_abund=1, test_min
     :param initial_test_step: The size of the steps taken to test viability
     :return: min,max viability
     """
+
     viability_range = np.arange(start=test_min, stop=test_max, step=initial_test_step)
     item_list = [(inoculum, rel_abund, v, num_wells, observed_pure) for v in viability_range]
     with Pool(num_threads) as p:
@@ -163,8 +179,8 @@ def estimate_viability(inoculum, num_wells, observed_pure, rel_abund=1, test_min
         new_min = np.max([0, min - initial_test_step])
         new_max = np.min([1, max + initial_test_step])
         new_step = initial_test_step / 10
-        print(
-            f'''Minimum and maximum values are {min} and {max}, respectively - refining:\nTesting values between {new_min:.3f} and {new_max:.3f} in increments of {new_step}''')
+        #print(
+        #    f'''Minimum and maximum values are {min} and {max}, respectively - refining:\nTesting values between {new_min:.3f} and {new_max:.3f} in increments of {new_step}''')
 
         viability_range = np.arange(start=new_min, stop=new_max, step=new_step)
         item_list = [(inoculum, rel_abund, v, num_wells, observed_pure) for v in viability_range]
@@ -184,7 +200,7 @@ def estimate_viability(inoculum, num_wells, observed_pure, rel_abund=1, test_min
             new_min = 0
             new_max = new_step
             new_step = new_step / 10
-            print(f'Trying values between {new_min} and {new_max} with increments of {new_step}')
+            #print(f'Trying values between {new_min} and {new_max} with increments of {new_step}')
             viability_range = np.arange(start=new_min, stop=new_max, step=new_step)
             item_list = [(inoculum, rel_abund, v, num_wells, observed_pure) for v in viability_range]
 
@@ -195,27 +211,58 @@ def estimate_viability(inoculum, num_wells, observed_pure, rel_abund=1, test_min
             min = np.min(cleaned_viability_values)
             max = np.max(cleaned_viability_values)
         else:
-            print(f'Gave up - estimated viability is really rather low.')
+            #print(f'Gave up - estimated viability is really rather low.')
             min = np.NaN
             max = np.NaN
 
     return min, max
 
-def estimate_viability_wrapper(inoculum, wells, num_observed, rel_abund):
-    print(f'Estimating viability using {num_threads} processors and {number_of_experiments} bootstraps')
-    result = bootstrap_dte(inoculum, rel_abund, 1, wells)
-    min, max = estimate_viability(inoculum, wells, num_observed, rel_abund)
-    print(f'''
-        You simulated a DTE where you inoculated {wells} wells with an average of {inoculum} cells per well.
-        A range of decreasing viability was tested using {number_of_experiments} bootstraps per experiment.
-        Your estimated relative abundance for your taxon of interest was:       {rel_abund:1.3%}
-        You observed:                                                           {num_observed} wells of interest
-        
-        If viability of your taxon had been 100%, you would have expected:      {result.pure_well_med:.0f} ({result.pure_well_95pc_low:.0f}-{result.pure_well_95pc_high:.0f}, 95%CI)
-        
-        The viability estimates that explain your observed counts is between:   {min:1.3%} - {max:1.3%}
-        ''')
+def estimate_viability_wrapper(inoculum, wells, num_observed, rel_abund, bulk=False):
+    start = timer()
 
+    #print(f'Estimating viability using {num_threads} processors and {number_of_experiments} bootstraps')
+    result = bootstrap_dte(inoculum, rel_abund, 1, wells)
+    if result.pure_well_95pc_high *1.1 < num_observed:
+        print(f'''
+            {bcolors.FAIL}Your number of observed wells ({num_observed}) is at least 10% greater than the 95%CI maximum if viability were 100% ({result.pure_well_95pc_high:.0f}).
+            Consequently, it makes little sense to try and estimate viability >100%, so I will set min,max values to Inf.
+            I advise caution in interpreting such extreme values.{bcolors.ENDC}''')
+        min=np.Inf
+        max=np.Inf
+    else:
+        min, max = estimate_viability(inoculum, wells, num_observed, rel_abund)
+
+    end = timer()
+    clock_time = end - start
+
+    print(f'''
+            You simulated a DTE where you inoculated {wells} wells with an average of {inoculum} cells per well.
+            A range of decreasing viability was tested using {number_of_experiments} bootstraps per experiment.
+            {bcolors.OKGREEN}Your estimated relative abundance for your taxon of interest was:       {rel_abund:1.3%}
+            You observed:                                                           {num_observed} wells of interest
+
+            If viability of your taxon had been 100%, you would have expected:      {result.pure_well_med:.0f} ({result.pure_well_95pc_low:.0f}-{result.pure_well_95pc_high:.0f}, 95%CI)
+
+            The viability estimates that explain your observed counts is between:   {min:1.3%} - {max:1.3%}
+            {bcolors.ENDC}(the whole process took {clock_time:1.3f} seconds)
+            ''')
+
+    return pd.Series(data=[result.pure_well_med,  result.pure_well_95pc_low, result.pure_well_95pc_high, min, max],
+                    index=['pure_well_med', 'pure_well_95pc_low', 'pure_well_95pc_high', 'viability_95pc_low', 'viabiilty_95pc_high'])
+
+
+
+def bulk_estimate(args):
+    df = pd.read_csv(args.input, sep='\t')
+    results = []
+    for index, row in df.iterrows():
+        results.append(estimate_viability_wrapper(row['inoculum'],
+                                                    row['wells'],
+                                                    row['num_observed'],
+                                                    row['rel_abund'], bulk=True))
+    results_df = pd.DataFrame(results)
+    out_df = df.join(results_df)
+    out_df.to_csv(args.output, sep='\t', index=False)
 
 def main():
 
@@ -237,6 +284,8 @@ def main():
         estimate_viability_wrapper(args.inoculum, args.wells, args.num_observed, args.rel_abund)
     elif args.subcommand =='predict_wells':
         predict_wells(args.inoculum, args.rel_abund, args.viability, args.wells)
+    elif args.subcommand =='bulk':
+        bulk_estimate(args)
 
 
 if __name__=="__main__":
