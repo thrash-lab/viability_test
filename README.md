@@ -48,8 +48,6 @@ Unless you specify `--threads` or `-p`, it will use all the processors on the av
 
 After a few seconds, you should see something like the following:
 ```
-Predicting outcome of a DTE experiment using 4 processors and 9999 bootstraps
-
     You simulated a DTE where you inoculated 500 wells with an average of 2 cells per well.
     Your estimated relative abundance for your taxon of interest was:       50.000%
     Your estimated viability of your taxon of interest was:                 100.000%
@@ -75,10 +73,6 @@ python viability_test/viability_test.py estimate_viability -w 500 -i 2 -o 5 -r 0
 
 Your output should look something like this:
  ```
-Estimating viability using 4 processors and 9999 bootstraps
-Minimum and maximum values are 0.01 and 0.06, respectively - refining:
-Testing values between 0.000 and 0.070 in increments of 0.001
-
         You simulated a DTE where you inoculated 500 wells with an average of 2 cells per well.
         A range of decreasing viability was tested using 9999 bootstraps per experiment.
         Your estimated relative abundance for your taxon of interest was:       50.000%
@@ -106,8 +100,6 @@ python viability_test/viability_test.py -b 999 predict_wells -w 2000 -i 2 -r 0.5
 ```
 
 ```
-Predicting outcome of a DTE experiment using 4 processors and 999 bootstraps
-
     You simulated a DTE where you inoculated 2000 wells with an average of 2 cells per well.
     Your estimated relative abundance for your taxon of interest was:       50.000%
     Your estimated viability of your taxon of interest was:                 0.900%
@@ -127,7 +119,6 @@ python viability_test/viability_test.py -b 999 predict_wells -w 50000 -i 2 -r 0.
 ```
 
 ```
-Predicting outcome of a DTE experiment using 4 processors and 999 bootstraps
 
     You simulated a DTE where you inoculated 50000 wells with an average of 2 cells per well.
     Your estimated relative abundance for your taxon of interest was:       5.000%
