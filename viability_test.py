@@ -32,14 +32,14 @@ def setup_args():
 
     # Positional mandatory arguments
     parser_estimate_viability.add_argument("-w", "--wells", help="The number of wells to simulate", type=int, required=True)
-    parser_estimate_viability.add_argument("-i", "--inoculum", help="The number of cells added to each well", type=int, required=True)
+    parser_estimate_viability.add_argument("-i", "--inoculum", help="The number of cells added to each well", type=float, required=True)
     parser_estimate_viability.add_argument("-o", "--num_observed", help="The number of observed positive wells", type=int, required=True)
-    parser_estimate_viability.add_argument("-r", "--rel_abund", help="he relative abundance of a particular taxon in your inoculum", type=float, default=1)
+    parser_estimate_viability.add_argument("-r", "--rel_abund", help="The relative abundance of a particular taxon in your inoculum", type=float, default=1)
 
     parser_predict_wells = subparsers.add_parser('predict_wells', help='Predict the number of wells you are likely to observe for a given taxon in a DTE experiment')
     parser_predict_wells.add_argument("-w", "--wells", help="The number of wells to simulate", type=int, required=True)
     parser_predict_wells.add_argument("-i", "--inoculum",
-                                       help="The number of cells added to each well", type=int,
+                                       help="The number of cells added to each well", type=float,
                                        required=True)
     parser_predict_wells.add_argument('-r', '--rel_abund',
                                       help='The relative abundance of a particular taxon in your inoculum', type=float, default=1)
