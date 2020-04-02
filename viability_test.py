@@ -262,6 +262,9 @@ def bulk_estimate(args):
                                                     row['rel_abund'], bulk=True))
     results_df = pd.DataFrame(results)
     out_df = df.join(results_df)
+    out_df['within_range']  = (out_df.num_observed >= out_df.pure_well_95pc_low) & (out_df.num_observed<=out_df.pure_well_95pc_high)
+    out_df['deviance'] = None
+    out_df.loc[~out_df.within_range, 'deviance'] = out_df.num_observed - out_df.pure_well_med
     out_df.to_csv(args.output, sep='\t', index=False)
 
 def main():
