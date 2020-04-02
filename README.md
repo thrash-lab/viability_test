@@ -112,7 +112,7 @@ python viability_test/viability_test.py -b 999 predict_wells -w 2000 -i 2 -r 0.5
 
 ```
 
-So, if you inoculated 20,000 wells, you would observe 2-12 taxon specific positive wells of growth. That's doable. Now imagine though that your taxon of interest is only 5% of your population.
+So, if you inoculated 2,000 wells, you would observe 2-12 taxon specific positive wells of growth. That's doable. Now imagine though that your taxon of interest is only 5% of your population.
 
 ```
 python viability_test/viability_test.py -b 999 predict_wells -w 50000 -i 2 -r 0.05 -v 0.009
